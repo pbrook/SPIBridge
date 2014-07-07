@@ -1,0 +1,4 @@
+Arduino sketch implementing a transmit only serial/USB to SPI bridge.
+
+The Arduino 1.0.5 USB-Serial code is extremely slow.
+This is partially fixed by https://github.com/arduino/Arduino/pull/1953
