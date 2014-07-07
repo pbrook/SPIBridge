@@ -23,8 +23,8 @@ void loop()
 {
   int c;
   SPCR &= ~_BV(SPIE);
-  // Clear SPIF
-  SPSR = SPSR;
+  // Access SPSR followed by SPDR to clear SPIF
+  SPSR;
   SPDR = 0xff;
   while (true) {
       digitalWrite(cs_pin, 0);
@@ -37,6 +37,8 @@ void loop()
 	    /* no-op */;
 	  SPDR = c;
       }
+      while ((SPSR & _BV(SPIF)) == 0)
+	/* no-op */;
       digitalWrite(cs_pin, 1);
   }
 }
