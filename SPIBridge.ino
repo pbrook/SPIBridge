@@ -7,6 +7,7 @@
 #include <SPI.h>
 
 static const uint8_t cs_pin = 10;
+static const uint8_t led_pin = SS;
 
 void setup()
 {
@@ -32,6 +33,7 @@ void loop()
       while (!Serial.available())
 	/* no-op */;
       digitalWrite(cs_pin, 0);
+      TXLED1;
       while (true) {
 	  c = Serial.read();
 	  // The Arduino SPI code waits for the transmit to complete before returning.
@@ -43,6 +45,8 @@ void loop()
 	    break;
 	  SPDR = c;
       }
+      TXLED0;
       digitalWrite(cs_pin, 1);
+      delayMicroseconds(10);
   }
 }
