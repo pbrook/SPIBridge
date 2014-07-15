@@ -9,8 +9,12 @@
 static const uint8_t cs_pin = 10;
 static const uint8_t led_pin = SS;
 
+#define NUM_BUTTONS 10
+static bool button_state[NUM_BUTTONS];
+
 void setup()
 {
+  int i;
   Serial.begin(9600);
   pinMode(cs_pin, OUTPUT);
   digitalWrite(cs_pin, 1);
@@ -18,6 +22,37 @@ void setup()
   SPI.setClockDivider(SPI_CLOCK_DIV8);
   SPI.setDataMode(SPI_MODE3);
   SPI.begin();
+  for (i = 0; i < NUM_BUTTONS; i++) {
+      pinMode(i, INPUT_PULLUP);
+  }
+  Keyboard.begin();
+}
+
+static void
+check_buttons(void)
+{
+  int i;
+  static long next_check;
+  long now;
+  bool new_state;
+  now = millis();
+  if (next_check) {
+      if (now - next_check < 0)
+	return;
+      next_check = 0;
+  }
+  for (i = 0; i < NUM_BUTTONS; i++) {
+      new_state = (digitalRead(i) == 0);
+      if (new_state != button_state[i]) {
+	  button_state[i] = new_state;
+	  if (new_state) {
+	      Keyboard.press('0' + i);
+	  } else {
+	      Keyboard.release('0' + i);
+	  }
+	  next_check = now + 100;
+      }
+  }
 }
 
 void loop()
@@ -31,7 +66,7 @@ void loop()
     /* no-op */;
   while (true) {
       while (!Serial.available())
-	/* no-op */;
+	check_buttons();
       digitalWrite(cs_pin, 0);
       TXLED1;
       while (true) {
