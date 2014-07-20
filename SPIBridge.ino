@@ -58,6 +58,7 @@ check_buttons(void)
 void loop()
 {
   int c;
+  bool new_connection = true;
   SPCR &= ~_BV(SPIE);
   // Access SPSR followed by SPDR to clear SPIF
   SPSR;
@@ -67,6 +68,13 @@ void loop()
   while (true) {
       while (!Serial.available())
 	check_buttons();
+      if (new_connection) {
+         Serial.write(0xfe);
+         Serial.write('L');
+         Serial.write('E');
+         Serial.write('D');
+         new_connection = false;
+      }
       digitalWrite(cs_pin, 0);
       TXLED1;
       while (true) {
@@ -82,6 +90,8 @@ void loop()
       }
       TXLED0;
       digitalWrite(cs_pin, 1);
+      if (!Serial)
+        new_connection = true;
       delayMicroseconds(10);
   }
 }
